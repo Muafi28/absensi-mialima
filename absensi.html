@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Absensi Kelas 3A</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f0fff0;
+      color: #333;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
+      width: 100%;
+      max-width: 1200px;
+      margin: auto;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    header img {
+      height: 60px;
+    }
+    h1 {
+      text-align: center;
+      color: #006400;
+      margin-bottom: 5px;
+    }
+    .subheading {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .clock {
+      font-size: 1rem;
+      text-align: right;
+      margin-bottom: 10px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+    table, th, td {
+      border: 1px solid #ccc;
+    }
+    th, td {
+      padding: 8px;
+      text-align: center;
+      font-size: 12px;
+    }
+    th {
+      background-color: #ccffcc;
+    }
+    .footer {
+      margin-top: 20px;
+      font-size: 12px;
+    }
+    .rekap {
+      margin-top: 30px;
+    }
+    .btn-save {
+      background: #66cc66;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
+    .btn-save:hover {
+      background: #4CAF50;
+    }
+    @media print {
+      .clock, .btn-save { display: none; }
+    }
+    .percent {
+      font-weight: bold;
+      color: green;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <img src="logo-sekolah.png" alt="Logo Sekolah" />
+      <div class="clock" id="clock"></div>
+    </header>
+    <h1>DAFTAR ABSENSI SISWA KELAS 3 A MI AL IMAN</h1>
+    <div class="subheading">Tahun Pelajaran 2025/2026</div>
+
+    <button class="btn-save" onclick="simpanAbsensi()">💾 SIMPAN</button>
+
+    <table id="absensiTable">
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Nama Siswa</th>
+          <th>Tanggal</th>
+          <th>Hari</th>
+          <th>Kehadiran</th>
+          <th>% Hadir</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- 20 siswa -->
+        <script>
+          const siswa = [
+            "Abu Musa Al Asy'ari", "Afaf Hadi Assegaf", "Ahmad Zaini Dahlan", "Alif Cahaya Faridah Sejati",
+            "Aminah Sukorilla Azka", "Bilqis Khaira Agustin", "Dafita Raisya Wilona", "Hisana Alfira Zahra",
+            "Khodijah Al Azizah", "Maritza Assyabya Rafifa", "Mohammad Qhozi Ghoniyy Al Ayubby",
+            "Muhammad Adi Saputra", "Muhammad Hudan Dwi Aulady", "Muhammad Yazid Chang Abdillah",
+            "Muhammad Zainul Abidin", "Niza Amelia Putri Hofide", "Safinatun Najah", "Salilatuz Zahro",
+            "Shaqueena Saila Abbas", "Syena Adiva Nurachma Dewi"
+          ];
+          const tbody = document.currentScript.parentElement;
+          siswa.forEach((nama, i) => {
+            tbody.innerHTML += `
+              <tr data-index="${i}">
+                <td>${i + 1}</td>
+                <td>${nama}</td>
+                <td><input type="date"></td>
+                <td><input type="text" placeholder="Senin"></td>
+                <td>
+                  <select onchange="updatePersentase(${i})">
+                    <option value="">--Pilih--</option>
+                    <option value="hadir">✔️ Hadir</option>
+                    <option value="izin">📩 Izin</option>
+                    <option value="sakit">🤒 Sakit</option>
+                    <option value="alpha">❌ Alpha</option>
+                  </select>
+                </td>
+                <td class="percent" id="persen-${i}">0%</td>
+              </tr>
+            `;
+          });
+
+          let totalHari = 0;
+          const hadirCount = Array(siswa.length).fill(0);
+          const updatePersentase = (index) => {
+            totalHari++;
+            const selects = document.querySelectorAll(`tr[data-index='${index}'] select`);
+            let hadir = 0;
+            selects.forEach(sel => {
+              if (sel.value === "hadir") hadir++;
+            });
+            const persen = Math.round((hadir / totalHari) * 100);
+            document.getElementById(`persen-${index}`).innerText = `${persen}%`;
+          };
+
+          const simpanAbsensi = () => {
+            const data = [];
+            const rows = document.querySelectorAll("tbody tr");
+            rows.forEach(row => {
+              const nama = row.children[1].textContent;
+              const tanggal = row.children[2].querySelector("input").value;
+              const hari = row.children[3].querySelector("input").value;
+              const kehadiran = row.children[4].querySelector("select").value;
+              const persen = row.children[5].textContent;
+              data.push({ nama, tanggal, hari, kehadiran, persen });
+            });
+            localStorage.setItem("absensiKelas3A", JSON.stringify(data));
+            alert("Data absensi berhasil disimpan di browser!");
+          };
+
+          window.addEventListener("load", () => {
+            const saved = JSON.parse(localStorage.getItem("absensiKelas3A"));
+            if (saved) {
+              const rows = document.querySelectorAll("tbody tr");
+              saved.forEach((item, i) => {
+                if (rows[i]) {
+                  rows[i].children[2].querySelector("input").value = item.tanggal;
+                  rows[i].children[3].querySelector("input").value = item.hari;
+                  rows[i].children[4].querySelector("select").value = item.kehadiran;
+                  rows[i].children[5].textContent = item.persen;
+                }
+              });
+            }
+          });
+        </script>
+      </tbody>
+    </table>
+
+    <div class="rekap">
+      <h3>Rekapitulasi Kehadiran Bulanan</h3>
+      <p>(Persentase otomatis akan berubah setiap kali pilihan kehadiran diubah. Klik tombol "SIMPAN" untuk menyimpan hasil ke browser.)</p>
+    </div>
+
+    <div class="footer">
+      <p>Catatan Tambahan: ...............................................................................................................</p>
+      <br><br>
+      <p style="text-align:right;">Tanda Tangan Wali Kelas: _____________________</p>
+    </div>
+  </div>
+
+  <script>
+    function updateClock() {
+      const now = new Date();
+      const days = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+      const day = days[now.getDay()];
+      const date = now.toLocaleDateString('id-ID');
+      const time = now.toLocaleTimeString();
+      document.getElementById('clock').innerText = `${day}, ${date} - ${time}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+  </script>
+</body>
+</html>
